@@ -20,4 +20,31 @@ class Parser
     @all_rows_array.shift
     @all_rows_array
   end
+  
+  def publish_data
+    read_csv("./event_attendees.csv")
+    connection = Bunny.new
+    connection.start
+    
+    channel = connection.create_channel
+    
+    send_queue = channel.queue("send.hash_rows_1")
+    response_queue = channel.queue("send.response_1")
+    counter = 0 
+    response_queue.subscribe do |delivery_info, metadata, payload|
+      while counter <= 5174
+        if JSON.parse(payload) == "Processed. Waiting..."
+          puts "Success. Sending next row..."
+          send_queue.publish(@all_rows_array[counter])
+          counter += 1
+        else
+          puts "An error has occurred."
+        end
+      end
+    end
+  end
+  
 end
+
+parser = Parser.new
+parser.publish_data
