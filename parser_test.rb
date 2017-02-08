@@ -15,7 +15,12 @@ class TestParser < Minitest::Test
 
   def test_it_reads_the_csv_and_has_the_right_data
     result = @parser.read_csv("./event_attendees.csv")
-    assert_equal "Allison", result[1][2]
+    assert_equal "Allison", result[0][:first_name]
+  end
+
+  def test_it_reads_the_csv_and_has_the_right_amount_of_data
+    result = @parser.read_csv("./event_attendees.csv")
+    assert_equal 5175, result.count
   end
   
   
